@@ -17,7 +17,7 @@ func GetNowTime() int64 {
 
 // GetMicroTime 获取毫秒时间戳
 func GetMicroTime() int64 {
-	return time.Now().Local().UnixNano() / 1e6
+	return time.Now().Local().UnixMilli()
 }
 
 // UnixTimeForFormat 时间戳转时间字符串
