@@ -2,3 +2,4 @@
 go.sum
 *.log
 log
+main.go
