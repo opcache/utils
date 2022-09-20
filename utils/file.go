@@ -14,7 +14,6 @@ import (
 // GetSize 获取文件大小
 func GetSize(f multipart.File) (int, error) {
 	content, err := io.ReadAll(f)
-
 	return len(content), err
 }
 
@@ -26,7 +25,6 @@ func GetExt(fileName string) string {
 // CheckExist 检查文件是否存在
 func CheckExist(src string) bool {
 	_, err := os.Stat(src)
-
 	return os.IsNotExist(err)
 }
 
