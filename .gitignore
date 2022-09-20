@@ -1,5 +1,6 @@
 .idea
 go.sum
+go.mod
 *.log
 log
 main.go
