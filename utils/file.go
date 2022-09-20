@@ -2,19 +2,18 @@ package utils
 
 import (
 	"errors"
-	"github.com/shamsher31/goimgext"
-	"io/ioutil"
-	"log"
+	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
-	"strings"
 )
 
 // GetSize 获取文件大小
 func GetSize(f multipart.File) (int, error) {
-	content, err := ioutil.ReadAll(f)
+	content, err := io.ReadAll(f)
 
 	return len(content), err
 }
@@ -71,55 +70,36 @@ func Open(name string, flag int, perm os.FileMode) (*os.File, error) {
 	return f, nil
 }
 
-// GetImgType 获取Img文件类型
-func GetImgType(p string) (string, error) {
-	file, err := os.Open(p)
-	defer file.Close()
+// Download 下载文件
+func Download(remoteUrl, dstFile string) error {
+	client := &http.Client{}
+	uri, err := url.Parse(remoteUrl)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
-
-	buff := make([]byte, 512)
-
-	_, err = file.Read(buff)
-
+	// Create the file
+	out, err := os.Create(dstFile)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
+	defer out.Close()
 
-	filetype := http.DetectContentType(buff)
+	request, err := http.NewRequest("GET", uri.String(), nil)
+	request.Header.Add("Connection", "close")
+	request.Header.Add("Host", uri.Host)
+	request.Header.Add("Referer", uri.String())
+	request.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0")
 
-	ext := imgext.Get()
-
-	for i := 0; i < len(ext); i++ {
-		if strings.Contains(ext[i], filetype[6:len(filetype)]) {
-			return filetype, nil
-		}
-	}
-
-	return "", errors.New("invalid image type")
-}
-
-// GetType 获取文件类型
-func GetType(p string) (string, error) {
-	file, err := os.Open(p)
-	defer file.Close()
+	resp, err := client.Do(request)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
+	defer resp.Body.Close()
 
-	buff := make([]byte, 512)
-
-	_, err = file.Read(buff)
-
-	if err != nil {
-		log.Println(err)
+	if resp.StatusCode == http.StatusOK {
+		_, err = io.Copy(out, resp.Body)
+	} else {
+		return errors.New(fmt.Sprintf("bad status: %s", resp.Status))
 	}
-
-	filetype := http.DetectContentType(buff)
-
-	return filetype, nil
+	return nil
 }
