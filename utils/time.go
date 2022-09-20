@@ -10,7 +10,7 @@ const DATE_TEMPLATE = "2006-01-02"
 const DATETIME_TEMPLATE = "2006-01-02 15:04:05"
 const DATETIME_UNIXNANO_TEMPLATE = "2006-01-02 15:04:05.000"
 
-// GetNowTime 获取时间戳
+// GetNowTime 获取当前时间戳
 func GetNowTime() int64 {
 	return time.Now().Local().Unix()
 }
